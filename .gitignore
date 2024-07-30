@@ -9,3 +9,6 @@ test.txt
 
 # Cache
 __pycache__
+
+# DB File
+db.sqlite3
