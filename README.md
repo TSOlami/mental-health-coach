@@ -7,6 +7,6 @@
 4. Run the main file.
 
 ## Example usage 
-1. python3 main.py
+1. Run the file on the terminal using: python3 main.py
 2. Choose an AI personality
 3. Start having conversations with the AI  
