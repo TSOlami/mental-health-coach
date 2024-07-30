@@ -26,9 +26,11 @@ const personalities = [
 
 export default function Personalities({ setPersonality }) {
   const [div, setDiv] = useState();
+  const [currentIndex, setCurrentIndex] = useState();
 
-  const handleDiv = (e) => {
+  const handleDiv = (e, index) => {
     setDiv(e.currentTarget.getAttribute("name"));
+    setCurrentIndex(index);
   };
   const handleBtn = () => {
     setPersonality(div);
@@ -40,9 +42,11 @@ export default function Personalities({ setPersonality }) {
         {personalities.map((person, index) => (
           <div
             key={index}
-            onClick={handleDiv}
+            onClick={(e) => handleDiv(e, index)}
             name={person.name}
-            className={styles.card}
+            className={`${styles.card} ${
+              currentIndex == index ? styles.clicked : ``
+            }`}
           >
             <h2>{person.name}</h2>
             <p>{person.desc}</p>

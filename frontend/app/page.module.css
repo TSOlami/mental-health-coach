@@ -99,7 +99,7 @@
 .card:hover{
   background-color: white;
 }
-.card:active{
+.clicked{
   background-color: white;
 }
 
