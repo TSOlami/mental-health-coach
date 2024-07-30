@@ -12,7 +12,9 @@ load_dotenv()
 AI71_API_KEY = os.getenv("AI71_API_KEY")
 
 if not AI71_API_KEY:
-    raise ValueError("API key not found. Please set the AI71_API_KEY environment variable.")
+    raise ValueError(
+        "API key not found. Please set the AI71_API_KEY environment variable."
+    )
 
 # Create a client
 client = AI71(AI71_API_KEY)
@@ -25,63 +27,66 @@ default_prompt = (
 )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 def initialize_chat(request):
-    personality = request.data.get('personality')
+    personality = request.data.get("personality")
 
     # Check if personality is provided and is a type string
     if not personality or not isinstance(personality, str):
-        return Response({'error': 'Personality is required and must be a string.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "Personality is required and must be a string."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     # Initialize the chat model with the selected personality
     system_prompt = f"{personality} {default_prompt}"
     messages = [
         {"role": "system", "content": f"{system_prompt}"},
         {"role": "user", "content": "Hello!"},  # Initial user message
-        ]
+    ]
 
     # Create chat completion
     try:
         chat_completion = client.chat.completions.create(
-            messages=messages,
-            model="tiiuae/falcon-180B-chat",
-            stream=False
+            messages=messages, model="tiiuae/falcon-180B-chat", stream=False
         )
         print("Chat completion: ", chat_completion)
         content = chat_completion.choices[0].message.content
-        return Response({'response': content})
+        return Response({"response": content})
 
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
+        return Response({"error": str(e)}, status=500)
 
-@api_view(['POST'])
+
+@api_view(["POST"])
 def chat(request):
-    message_history = request.data.get('message_history')
-    user_message = request.data.get('message')
+    message_history = request.data.get("message_history")
+    user_message = request.data.get("message")
 
     # Check if message history is provided and is a type list
     if not message_history or not isinstance(message_history, list):
-        return Response({'error': 'Message history is required and must be a list.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Message history is required and must be a list."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     # Check if user message is provided and is a type string
     if not user_message or not isinstance(user_message, str):
-        return Response({'error': 'Message is required and must be a string.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(
+            {"error": "Message is required and must be a string."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     # Append user message to message history
     message_history.append({"role": "user", "content": user_message})
 
     # Create chat completion
     try:
         chat_completion = client.chat.completions.create(
-            messages=message_history,
-            model="tiiuae/falcon-180B-chat",
-            stream=False
+            messages=message_history, model="tiiuae/falcon-180B-chat", stream=False
         )
         content = chat_completion.choices[0].message.content
-        return Response({'response': content})
+        return Response({"response": content})
 
     except Exception as e:
-        return Response({'error': str(e)}, status=500)
-    
-
-    
+        return Response({"error": str(e)}, status=500)

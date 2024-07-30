@@ -5,10 +5,12 @@ import axios from "axios";
 import styles from "../page.module.css";
 import { FaMicrophone } from "react-icons/fa";
 
-export default function Chatbot() {
-  const [messages, setMessages] = useState([]);
+export default function Chatbot({ personality }) {
+  const [messages, setMessages] = useState([
+    { text: "Hello, How are you doing?", sender: "bot" },
+  ]);
   const [input, setInput] = useState("");
-
+  console.log(messages);
   const handleMessage = async () => {
     if (input.trim() == "") return;
 
@@ -17,7 +19,7 @@ export default function Chatbot() {
     setInput("");
 
     try {
-      const response = await axios.post("/api/chatbot", { message: input });
+      const response = await axios.post("/api/chat/chat/", { message: input });
       const botMessage = { text: response.data.reply, sender: "bot" };
       setMessages([...messages, userMessage, botMessage]);
     } catch (error) {
