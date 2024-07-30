@@ -19,13 +19,6 @@ if not AI71_API_KEY:
 # Create a client
 client = AI71(AI71_API_KEY)
 
-# Define the default prompt
-default_prompt = (
-    "You must respond briefly and concisely and adhere to the personality traits provided. Only provide positive, encouraging and supportive responses. "
-    "Ensure that your replies are human-toned: conversational, personable, and relatable. Use natural language that feels warm and engaging. "
-    "Tailor the interaction based on user inputs, preferences, or mood data."
-)
-
 
 @api_view(["POST"])
 def initialize_chat(request):
@@ -39,9 +32,8 @@ def initialize_chat(request):
         )
 
     # Initialize the chat model with the selected personality
-    system_prompt = f"{personality} {default_prompt}"
     messages = [
-        {"role": "system", "content": f"{system_prompt}"},
+        {"role": "system", "content": f"{personality}"},
         {"role": "user", "content": "Hello!"},  # Initial user message
     ]
 
