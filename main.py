@@ -12,7 +12,7 @@ from ai_personalities import personality
 default_prompt = (
     "You must respond briefly and concisely and adhere to the personality traits provided. Only provide positive, encouraging and supportive responses. "
     "Ensure that your replies are human-toned: conversational, personable, and relatable. Use natural language that feels warm and engaging. "
-    "Avoid giving medical advice and remind users to seek professional help if needed."
+    "Tailor the interaction based on user inputs, preferences, or mood data."
 )
 
 # Ask user to choose one of the available personalities
