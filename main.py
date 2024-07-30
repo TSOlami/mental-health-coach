@@ -16,7 +16,7 @@ default_prompt = (
 )
 
 # Ask user to choose one of the available personalities
-print("Please choose a personality:")
+print("Please choose a personality: ")
 for key in personality:
     print(f"{key}")
 personality_choice = input("Enter the personality you would like to choose: ")
