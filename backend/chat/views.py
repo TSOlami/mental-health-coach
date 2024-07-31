@@ -79,6 +79,11 @@ def chat(request):
             messages=message_history, model="tiiuae/falcon-180B-chat", stream=False
         )
         content = chat_completion.choices[0].message.content
+        # Clean up the response content
+        content = content.strip()  # Remove leading and trailing whitespace
+        if content.endswith("\nUser:"):
+            content = content[:-len("\nUser:")].strip()
+        print("Response: ", content)
         return Response({"response": content})
 
     except Exception as e:
