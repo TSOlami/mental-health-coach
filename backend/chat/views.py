@@ -42,8 +42,9 @@ def initialize_chat(request):
         chat_completion = client.chat.completions.create(
             messages=messages, model="tiiuae/falcon-180B-chat", stream=False
         )
-        print("Chat completion: ", chat_completion)
+        
         content = chat_completion.choices[0].message.content
+        print("Response: ", content)
         return Response({"response": content})
 
     except Exception as e:
