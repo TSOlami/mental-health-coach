@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('initialize/', views.initialize_chat, name='initialize_chat'),
-    path('chat/', views.chat, name='chat'),
+    path('message/', views.chat, name='chat'),
 ]
