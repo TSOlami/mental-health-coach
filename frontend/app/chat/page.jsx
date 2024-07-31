@@ -17,13 +17,13 @@ export default function Chatbot({ personality }) {
 
   useEffect(() => {
     const initLeopard = async () => {
-      const leopardInstance  = LeopardWorker.create(
+      const leopardInstance = await LeopardWorker.create(
         process.env.NEXT_PUBLIC_LEOPARD_ACCESS_KEY,
         {
           publicPath: "/Budgie-leopard-v2.0.0-24-07-31--12-16-02.pv"
         }
       );
-      setLeopard(leopardInstance );
+      setLeopard(leopardInstance);
     };
 
     // Initialize Leopard voice assistant
@@ -31,9 +31,17 @@ export default function Chatbot({ personality }) {
 
     // Retrieve message history from local storage
     const storedMessages = localStorage.getItem('messageHistory');
+
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
+
+    // Cleanup on unmount
+    return () => {
+      if (leopard) {
+        leopard.release();
+      }
+    };
   }, []);
 
   const handleMessage = async () => {
@@ -95,32 +103,39 @@ export default function Chatbot({ personality }) {
     };
   };
   const stopRecording = () => {
-    mediaRecorder.stop();
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+    }
     setIsRecording(false);
     console.log("Recording stopped.");
   };
 
   const handleDataAvailable = async (event) => {
     const audioBlob = event.data;
-
-    const audioFile = new File([audioBlob], "audio.wav", { type: "audio/wav" });
-    
+    const audioArrayBuffer = await audioBlob.arrayBuffer();
+    const audioBuffer = await new AudioContext().decodeAudioData(audioArrayBuffer);
+    const audioData = new Int16Array(audioBuffer.getChannelData(0).length);
+  
+    // Convert audio buffer to Int16Array
+    for (let i = 0; i < audioBuffer.getChannelData(0).length; i++) {
+      audioData[i] = audioBuffer.getChannelData(0)[i] * 32767;
+    }
+  
     if (leopard) {
       try {
-        const text = await leopard.process(audioFile);
-        console.log("Leopard recognized text:", text);
-        setInput(text);
+        const { transcript, words } = await leopard.process(audioData);
+        console.log("Leopard recognized text:", transcript);
+        console.log("Words: ");
+        setInput(transcript);
         handleMessage();
       } catch (error) {
         console.error("Error processing audio with Leopard:", error);
       }
     }
-
-    const audioURL = URL.createObjectURL(audioBlob);
-    setAudioURL(audioURL);
   };
   console.log("Input:", input.trim());
   console.log("Is Recording:", isRecording);
+
   
   return (
     <div className={styles.chatbox}>
@@ -148,6 +163,7 @@ export default function Chatbot({ personality }) {
           onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleMessage()}
           className={styles.input}
           placeholder="Type your message..."
+          disabled={isRecording}
         />
 
         {input.trim() === "" ? (
