@@ -3,15 +3,32 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../page.module.css";
-import { FaMicrophone } from "react-icons/fa";
+import { LeopardWorker } from "@picovoice/leopard-web";
+import { FaMicrophone, FaStop, FaPlay } from "react-icons/fa";
 
 export default function Chatbot({ personality }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioURL, setAudioURL] = useState("");
+  const [leopard, setLeopard] = useState(null);
 
-  console.log(messages);
 
   useEffect(() => {
+    const initLeopard = async () => {
+      const leopardInstance  = LeopardWorker.create(
+        process.env.NEXT_PUBLIC_LEOPARD_ACCESS_KEY,
+        {
+          publicPath: "/Budgie-leopard-v2.0.0-24-07-31--12-16-02.pv"
+        }
+      );
+      setLeopard(leopardInstance );
+    };
+
+    // Initialize Leopard voice assistant
+    initLeopard();
+
     // Retrieve message history from local storage
     const storedMessages = localStorage.getItem('messageHistory');
     if (storedMessages) {
@@ -25,7 +42,7 @@ export default function Chatbot({ personality }) {
     const userMessage = { role: "user", content: input };
     const updatedMessages = [...messages, userMessage];
 
-    setMessages([...messages, userMessage]);
+    setMessages(updatedMessages);
     localStorage.setItem('messageHistory', JSON.stringify(updatedMessages));
     setInput("");
 
@@ -62,11 +79,53 @@ export default function Chatbot({ personality }) {
     setMessages(systemMessage);
     localStorage.setItem('messageHistory', JSON.stringify(systemMessage));
   };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = handleDataAvailable;
+      mediaRecorder.start();
+      setMediaRecorder(mediaRecorder);
+
+      setIsRecording(true);
+      console.log("Recording started.");
+    } catch (error) {
+      console.error("Error recording audio:", error);
+    };
+  };
+  const stopRecording = () => {
+    mediaRecorder.stop();
+    setIsRecording(false);
+    console.log("Recording stopped.");
+  };
+
+  const handleDataAvailable = async (event) => {
+    const audioBlob = event.data;
+
+    const audioFile = new File([audioBlob], "audio.wav", { type: "audio/wav" });
+    
+    if (leopard) {
+      try {
+        const text = await leopard.process(audioFile);
+        console.log("Leopard recognized text:", text);
+        setInput(text);
+        handleMessage();
+      } catch (error) {
+        console.error("Error processing audio with Leopard:", error);
+      }
+    }
+
+    const audioURL = URL.createObjectURL(audioBlob);
+    setAudioURL(audioURL);
+  };
+  console.log("Input:", input.trim());
+  console.log("Is Recording:", isRecording);
   
   return (
     <div className={styles.chatbox}>
       <div className={styles.messages}>
-        
+
         {messages.slice(2).map((msg, index) => (
             console.log(msg),
           <div
@@ -92,14 +151,22 @@ export default function Chatbot({ personality }) {
         />
 
         {input.trim() === "" ? (
-          <div className={styles.btn}>
-            <FaMicrophone size={24} />
-          </div>
-        ) : (
-          <button onClick={handleMessage} className={styles.sendButton}>
-            Send
-          </button>
-        )}
+            <>
+              {isRecording ? (
+                <div className={styles.clearButton}>
+                  <FaStop size={24} onClick={stopRecording} />
+                </div>
+              ) : (
+                <div className={styles.btn}>
+                  <FaMicrophone size={24} onClick={startRecording} />
+                </div>
+              )}
+            </>
+          ) : (
+            <button onClick={handleMessage} className={styles.sendButton}>
+              Send
+            </button>
+          )}
 
         <button onClick={handleClearChat} className={styles.clearButton}>
             Clear Chat
