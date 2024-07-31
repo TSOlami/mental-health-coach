@@ -45,7 +45,7 @@
 }
 
 .bot{
-  background-color: #f1f1f1;
+  background-color: #3308c1;
   align-self: flex-start;
 }
 
@@ -60,6 +60,36 @@
   padding: 1rem;
   border: 1px solid #ccc;
   border-radius: 10px;
+}
+
+.sendButton {
+  background-color: #28a745; /* Green color */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.sendButton:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.clearButton {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.clearButton:hover {
+  background-color: #e60000; /* Darker red for hover effect */
 }
 
 .btn{
