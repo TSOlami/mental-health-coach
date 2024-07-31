@@ -73,7 +73,8 @@ export default function Personalities({ setPersonality }) {
         ];
         localStorage.setItem("messageHistory", JSON.stringify(initialMessages));
         
-        router.push('/chat');
+        // Navigate to the chat page
+        window.location.href = "/chat";
       } else {
         console.error("Failed to initialize chat");
       }
