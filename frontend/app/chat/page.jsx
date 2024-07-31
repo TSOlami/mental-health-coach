@@ -3,32 +3,42 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../page.module.css";
-import { LeopardWorker } from "@picovoice/leopard-web";
+// import { LeopardWorker } from "@picovoice/leopard-web";
+import { useCheetah } from "@picovoice/cheetah-react";
 import { FaMicrophone, FaStop, FaPlay } from "react-icons/fa";
 
 export default function Chatbot({ personality }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [audioURL, setAudioURL] = useState("");
-  const [leopard, setLeopard] = useState(null);
+  const [currentTranscript, setCurrentTranscript] = useState("");
 
+  const AccessKey = process.env.NEXT_PUBLIC_CHEETAH_ACCESS_KEY;
+  const ModelFilePath = "/models/cheetah_params.pv";
+
+  const {
+    result,
+    isLoaded,
+    isListening,
+    error,
+    init,
+    start,
+    stop,
+    release,
+  } = useCheetah();
 
   useEffect(() => {
-    const initLeopard = async () => {
-      const leopardInstance = await LeopardWorker.create(
-        process.env.NEXT_PUBLIC_LEOPARD_ACCESS_KEY,
-        {
-          publicPath: "/Budgie-leopard-v2.0.0-24-07-31--12-16-02.pv"
-        }
-      );
-      setLeopard(leopardInstance);
+    // Initialize Cheetah with the access key and model path
+    const initializeCheetah = async () => {
+      try {
+        await init(AccessKey, { publicPath: ModelFilePath });
+        console.log("Cheetah initialized.");
+      } catch (error) {
+        console.error("Error initializing Cheetah:", error);
+      }
     };
-
-    // Initialize Leopard voice assistant
-    initLeopard();
-
+  
+    initializeCheetah();
     // Retrieve message history from local storage
     const storedMessages = localStorage.getItem('messageHistory');
 
@@ -38,11 +48,31 @@ export default function Chatbot({ personality }) {
 
     // Cleanup on unmount
     return () => {
-      if (leopard) {
-        leopard.release();
-      }
+      release();
     };
   }, []);
+
+  useEffect(() => {
+    if(isLoaded){
+      console.log("Cheetah is loaded.")
+    }
+
+    if (result !== null && isRecording) {
+      console.log("Transcript result: ", result);
+      // setInput(result.transcript);
+      // handleMessage();
+      setCurrentTranscript(result.transcript);
+    }
+
+    // Check for errors
+    if(error){
+      console.log("Error: ", error)
+    }
+
+    if(isListening){
+      console.log("Cheetah is listening.")
+    }
+  }, [result, isRecording]);
 
   const handleMessage = async () => {
     if (input.trim() == "") return;
@@ -69,7 +99,7 @@ export default function Chatbot({ personality }) {
         // Add AI response to the message history
         setMessages([...updatedMessages, { role: "assistant", content: data.response }]);
         localStorage.setItem('messageHistory', JSON.stringify([...updatedMessages, { role: "assistant", content: data.response }]));
-        setInput(""); // Clear input field
+        setInput("");
       } else {
         console.error("Failed to get response");
       }
@@ -89,51 +119,38 @@ export default function Chatbot({ personality }) {
   };
 
   const startRecording = async () => {
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorder.ondataavailable = handleDataAvailable;
-      mediaRecorder.start();
-      setMediaRecorder(mediaRecorder);
-
-      setIsRecording(true);
-      console.log("Recording started.");
-    } catch (error) {
-      console.error("Error recording audio:", error);
-    };
-  };
-  const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop();
-    }
-    setIsRecording(false);
-    console.log("Recording stopped.");
-  };
-
-  const handleDataAvailable = async (event) => {
-    const audioBlob = event.data;
-    const audioArrayBuffer = await audioBlob.arrayBuffer();
-    const audioBuffer = await new AudioContext().decodeAudioData(audioArrayBuffer);
-    const audioData = new Int16Array(audioBuffer.getChannelData(0).length);
-  
-    // Convert audio buffer to Int16Array
-    for (let i = 0; i < audioBuffer.getChannelData(0).length; i++) {
-      audioData[i] = audioBuffer.getChannelData(0)[i] * 32767;
-    }
-  
-    if (leopard) {
-      try {
-        const { transcript, words } = await leopard.process(audioData);
-        console.log("Leopard recognized text:", transcript);
-        console.log("Words: ");
-        setInput(transcript);
-        handleMessage();
-      } catch (error) {
-        console.error("Error processing audio with Leopard:", error);
+      if (!isLoaded) {
+        console.error("Cheetah is not loaded.");
+        return;
       }
+      await start();
+      setIsRecording(true);
+      setCurrentTranscript("");
+      console.log("Recording started.");
+
+    } catch (error) {
+      console.error("Error starting recording:", error);
     }
   };
-  console.log("Input:", input.trim());
+  const stopRecording = async () => {
+    try {
+      await stop();
+      setIsRecording(false);
+      // Set the input with the current transcript
+      setInput(currentTranscript);
+      console.log("Recording stopped.");
+
+      // Send the transcribed text to the API
+      if (currentTranscript.trim() !== "") {
+        await handleMessage();
+      }
+    } catch (error) {
+      console.error("Error stopping recording:", error);
+    }
+  };
+
   console.log("Is Recording:", isRecording);
 
   
@@ -142,7 +159,6 @@ export default function Chatbot({ personality }) {
       <div className={styles.messages}>
 
         {messages.slice(2).map((msg, index) => (
-            console.log(msg),
           <div
             key={index}
             className={`${styles.message} ${
@@ -166,7 +182,7 @@ export default function Chatbot({ personality }) {
           disabled={isRecording}
         />
 
-        {input.trim() === "" ? (
+        {input?.trim() === "" ? (
             <>
               {isRecording ? (
                 <div className={styles.clearButton}>
