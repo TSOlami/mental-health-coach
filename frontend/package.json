@@ -11,7 +11,9 @@
   "dependencies": {
     "@langchain/core": "^0.2.18",
     "@langchain/google-genai": "^0.0.23",
+    "@picovoice/cheetah-react": "^2.0.0",
     "@picovoice/leopard-web": "^2.0.1",
+    "@picovoice/web-voice-processor": "^4.0.9",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "langchain": "^0.2.11",
