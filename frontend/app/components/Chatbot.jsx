@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../page.module.css";
 import { FaMicrophone } from "react-icons/fa";
@@ -30,7 +30,7 @@ export default function Chatbot({ personality }) {
     setInput("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat/respond/", {
+      const response = await fetch("http://127.0.0.1:8000/api/chat/message/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
