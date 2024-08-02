@@ -48,6 +48,7 @@ def initialize_chat(request):
         return Response({"response": content})
 
     except Exception as e:
+        print("Error: ", e)
         return Response({"error": str(e)}, status=500)
 
 
