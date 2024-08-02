@@ -15,23 +15,11 @@ export default function Chatbot({ personality }) {
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
-  const AccessKey = process.env.NEXT_PUBLIC_CHEETAH_ACCESS_KEY;
-  const ModelFilePath = "/models/cheetah_params.pv";
-  const { result, isLoaded, isListening, error, init, start, stop, release } =
-    useCheetah();
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+  
 
   useEffect(() => {
-    // Initialize Cheetah with the access key and model path
-    const initializeCheetah = async () => {
-      try {
-        await init(AccessKey, { publicPath: ModelFilePath });
-        console.log("Cheetah initialized.");
-      } catch (error) {
-        console.error("Error initializing Cheetah:", error);
-      }
-    };
-
-    initializeCheetah();
     // Retrieve message history from local storage
     const storedMessages = localStorage.getItem("messageHistory");
 
@@ -39,33 +27,8 @@ export default function Chatbot({ personality }) {
       setMessages(JSON.parse(storedMessages));
     }
 
-    // Cleanup on unmount
-    return () => {
-      release();
-    };
   }, []);
 
-  useEffect(() => {
-    if (isLoaded) {
-      //console.log("Cheetah is loaded.");
-    }
-
-    if (result !== null && isRecording) {
-      console.log("Transcript result: ", result);
-      // setInput(result.transcript);
-      // handleMessage();
-      setCurrentTranscript(result.transcript);
-    }
-
-    // Check for errors
-    if (error) {
-      console.log("Error: ", error);
-    }
-
-    if (isListening) {
-      console.log("Cheetah is listening.");
-    }
-  }, [result, isRecording, isListening, isLoaded, error]);
 
   const handleMessage = async () => {
     if (input.trim() == "") return;
@@ -156,55 +119,65 @@ export default function Chatbot({ personality }) {
 
   const startRecording = async () => {
     try {
-      //
-      if (!isLoaded) {
-        console.error("Cheetah is not loaded.");
-        return;
-      }
-      // Check if the browser supports media devices
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        // Request access to the microphone
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
 
-        // If we got here, the user has granted access
-        console.log("Microphone access granted.");
+        recorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            setAudioBlob(event.data);
+          }
+        };
 
-        // Start the recording
-        await start();
-        console.log("Recording Started");
+        recorder.start();
+        setMediaRecorder(recorder);
         setIsRecording(true);
-        setCurrentTranscript("");
+        console.log("Recording Started");
       } else {
-        // Handle the case where media devices are not supported
         console.error("Media devices are not supported on this browser.");
       }
     } catch (error) {
       if (error.name === "NotAllowedError") {
-        // Handle the case where user denies access
         console.error("Microphone access denied.");
       } else {
-        // Handle other errors
         console.error("Error starting recording:", error);
       }
     }
   };
 
   const stopRecording = async () => {
-    try {
-      await stop();
+    if (mediaRecorder) {
+      mediaRecorder.stop();
       setIsRecording(false);
-      // Set the input with the current transcript
-      setInput(currentTranscript);
       console.log("Recording stopped.");
 
-      // Send the transcribed text to the API
-      if (currentTranscript.trim() !== "") {
-        await handleMessage();
+      if (audioBlob) {
+        const formData = new FormData();
+        formData.append("file", audioBlob, "speech.mp3");
+        formData.append("model", "whisper-1");
+        formData.append("response_format", "text");
+
+        try {
+          const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+            },
+            body: formData,
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setCurrentTranscript(data.text);
+            setInput(data.text);
+            await handleMessage();
+          } else {
+            console.error("Failed to transcribe audio");
+          }
+        } catch (error) {
+          console.error("Error transcribing audio:", error);
+        }
       }
-    } catch (error) {
-      console.error("Error stopping recording:", error);
     }
   };
 
