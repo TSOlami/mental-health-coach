@@ -7,11 +7,14 @@ import styles from "../page.module.css";
 import { useCheetah } from "@picovoice/cheetah-react";
 import { FaMicrophone, FaStop, FaPlay } from "react-icons/fa";
 
+
 export default function Chatbot({ personality }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [currentTranscript, setCurrentTranscript] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [audioUrl, setAudioUrl] = useState(null);
 
   const AccessKey = process.env.NEXT_PUBLIC_CHEETAH_ACCESS_KEY;
   const ModelFilePath = "/models/cheetah_params.pv";
@@ -99,6 +102,37 @@ export default function Chatbot({ personality }) {
         // Add AI response to the message history
         setMessages([...updatedMessages, { role: "assistant", content: data.response }]);
         localStorage.setItem('messageHistory', JSON.stringify([...updatedMessages, { role: "assistant", content: data.response }]));
+
+        if (selectedVoice) {
+          console.log("Calling OPENAI TTS API...")
+          // Call the server-side API route for text-to-speech
+          const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
+            method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+          },
+            body: JSON.stringify({
+              model: "tts-1-hd",
+              voice: selectedVoice,
+              input: data.response,
+            }),
+          });
+  
+          if (ttsResponse.ok) {
+            // Get the blob response and convert it to mp3
+            const audioBlob = await ttsResponse.blob();
+            console.log("Blob: ", audioBlob)
+            const newAudioUrl = URL.createObjectURL(audioBlob);
+            console.log("Audio available at: ", newAudioUrl)
+            setAudioUrl(newAudioUrl);
+
+          } else {
+            console.error("Failed to generate speech");
+          }
+        }
+
+        
         setInput("");
       } else {
         console.error("Failed to get response");
@@ -119,19 +153,39 @@ export default function Chatbot({ personality }) {
   };
 
   const startRecording = async () => {
-
+    
     try {
+      // 
       if (!isLoaded) {
         console.error("Cheetah is not loaded.");
         return;
       }
-      await start();
-      setIsRecording(true);
-      setCurrentTranscript("");
-      console.log("Recording started.");
 
+      // Check if the browser supports media devices
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Request access to the microphone
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        
+        // If we got here, the user has granted access
+        console.log("Microphone access granted.");
+        
+        // Start the recording
+        await start();
+        setIsRecording(true);
+        setCurrentTranscript("");
+        console.log("Recording started.");
+      } else {
+        // Handle the case where media devices are not supported
+        console.error("Media devices are not supported on this browser.");
+      }
     } catch (error) {
-      console.error("Error starting recording:", error);
+      if (error.name === 'NotAllowedError') {
+        // Handle the case where user denies access
+        console.error("Microphone access denied.");
+      } else {
+        // Handle other errors
+        console.error("Error starting recording:", error);
+      }
     }
   };
   const stopRecording = async () => {
@@ -153,9 +207,34 @@ export default function Chatbot({ personality }) {
 
   console.log("Is Recording:", isRecording);
 
-  
   return (
     <div className={styles.chatbox}>
+      <div className={styles.voiceSelector}>
+        <label htmlFor="voiceSelect">Select Voice:</label>
+        <select
+          id="voiceSelect"
+          onChange={(e) => setSelectedVoice(e.target.value)}
+          value={selectedVoice || ""}
+        >
+          <option value="">Mute</option>
+          <option value="alloy">Alloy</option>
+          <option value="echo">Echo</option>
+          <option value="fable">Fable</option>
+          <option value="onyx">Onyx</option>
+          <option value="nova">Nova</option>
+          <option value="shimmer">Shimmer</option>
+          
+        </select>
+      </div>
+
+      <div>
+        {audioUrl && (
+          <audio controls>
+            <source id="audioSource" type="audio/mpeg" src={audioUrl}/>
+          </audio>
+        )}
+      </div>
+
       <div className={styles.messages}>
 
         {messages.slice(2).map((msg, index) => (
