@@ -100,10 +100,10 @@ export default function Personalities({ setPersonality }) {
           <div>
             <div>
               <Image
-                width="100px"
-                height="50px"
+                width="100"
+                height="50"
                 src="../../public/next.svg"
-                placeholder="icon.svg"
+                
               />
             </div>
             <div
