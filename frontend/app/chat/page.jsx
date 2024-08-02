@@ -150,14 +150,16 @@ export default function Chatbot({ personality }) {
       mediaRecorder.stop();
       setIsRecording(false);
       console.log("Recording stopped.");
-
+  
       if (audioBlob) {
+        console.log("Audio Blob: ", audioBlob);
         const formData = new FormData();
         formData.append("file", audioBlob, "speech.mp3");
         formData.append("model", "whisper-1");
         formData.append("response_format", "text");
-
+  
         try {
+          console.log("Calling OPENAI Audio Transcription API...");
           const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
             method: "POST",
             headers: {
@@ -165,14 +167,22 @@ export default function Chatbot({ personality }) {
             },
             body: formData,
           });
-
+  
           if (response.ok) {
-            const data = await response.json();
-            setCurrentTranscript(data.text);
-            setInput(data.text);
-            await handleMessage();
+            try {
+              const text = await response.text();
+              console.log("Transcription Response: ", response);
+              setCurrentTranscript(text);
+              setInput(text);
+              await handleMessage();
+            } catch (jsonError) {
+              console.error("Error parsing JSON response:", jsonError);
+              const textResponse = await response.text();
+              console.error("Response text:", textResponse);
+            }
           } else {
-            console.error("Failed to transcribe audio");
+            const errorText = await response.text();
+            console.error("Failed to transcribe audio. Error:", errorText);
           }
         } catch (error) {
           console.error("Error transcribing audio:", error);
