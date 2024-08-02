@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <main className={styles.container}>
       <nav className={styles.logo}>
-        <h1>Anixety Bot</h1>
+        <h1>Budgie</h1>
       </nav>
       {personality ? (
         <Chatbot personality={personality} />
