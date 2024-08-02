@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import styles from "../page.module.css";
 import "../globals.css";
@@ -17,7 +17,7 @@ export default function Chatbot({ personality }) {
   const [audioUrl, setAudioUrl] = useState(null);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
-  
+  const messageEndRef = useRef(null);
 
   useEffect(() => {
     // Retrieve message history from local storage
@@ -26,9 +26,11 @@ export default function Chatbot({ personality }) {
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
-
   }, []);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleMessage = async () => {
     if (input.trim() == "") return;
@@ -120,7 +122,9 @@ export default function Chatbot({ personality }) {
   const startRecording = async () => {
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
         const recorder = new MediaRecorder(stream);
 
         recorder.ondataavailable = (event) => {
@@ -150,24 +154,27 @@ export default function Chatbot({ personality }) {
       mediaRecorder.stop();
       setIsRecording(false);
       console.log("Recording stopped.");
-  
+
       if (audioBlob) {
         console.log("Audio Blob: ", audioBlob);
         const formData = new FormData();
         formData.append("file", audioBlob, "speech.mp3");
         formData.append("model", "whisper-1");
         formData.append("response_format", "text");
-  
+
         try {
           console.log("Calling OPENAI Audio Transcription API...");
-          const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-            },
-            body: formData,
-          });
-  
+          const response = await fetch(
+            "https://api.openai.com/v1/audio/transcriptions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+              },
+              body: formData,
+            }
+          );
+
           if (response.ok) {
             try {
               const text = await response.text();
@@ -191,6 +198,9 @@ export default function Chatbot({ personality }) {
     }
   };
 
+  const scrollToBottom = () => {
+    messageEndRef.current?.scrollIntoView({ behaviour: "smooth" });
+  };
   return (
     <main className={styles.container}>
       <div className={styles.chatbox}>
@@ -209,6 +219,7 @@ export default function Chatbot({ personality }) {
               {msg.content}
             </div>
           ))}
+          <div ref={messageEndRef}></div>
         </div>
 
         <div className={styles.inputContainer}>
