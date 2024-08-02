@@ -14,11 +14,7 @@ export default function Home() {
       <nav className={styles.logo}>
         <h1>Budgie</h1>
       </nav>
-      {personality ? (
-        <Chatbot personality={personality} />
-      ) : (
-        <Personalities setPersonality={setPersonality} />
-      )}
+      <Personalities setPersonality={setPersonality} />
     </main>
   );
 }

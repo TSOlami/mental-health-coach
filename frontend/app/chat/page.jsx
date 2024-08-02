@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "../page.module.css";
-// import { LeopardWorker } from "@picovoice/leopard-web";
+import "../globals.css";
 import { useCheetah } from "@picovoice/cheetah-react";
 import { FaMicrophone, FaStop, FaPlay } from "react-icons/fa";
-
+import Dropdown from "../components/Dropdown";
 
 export default function Chatbot({ personality }) {
   const [messages, setMessages] = useState([]);
@@ -15,20 +15,10 @@ export default function Chatbot({ personality }) {
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
-
   const AccessKey = process.env.NEXT_PUBLIC_CHEETAH_ACCESS_KEY;
   const ModelFilePath = "/models/cheetah_params.pv";
-
-  const {
-    result,
-    isLoaded,
-    isListening,
-    error,
-    init,
-    start,
-    stop,
-    release,
-  } = useCheetah();
+  const { result, isLoaded, isListening, error, init, start, stop, release } =
+    useCheetah();
 
   useEffect(() => {
     // Initialize Cheetah with the access key and model path
@@ -40,10 +30,10 @@ export default function Chatbot({ personality }) {
         console.error("Error initializing Cheetah:", error);
       }
     };
-  
+
     initializeCheetah();
     // Retrieve message history from local storage
-    const storedMessages = localStorage.getItem('messageHistory');
+    const storedMessages = localStorage.getItem("messageHistory");
 
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
@@ -56,8 +46,8 @@ export default function Chatbot({ personality }) {
   }, []);
 
   useEffect(() => {
-    if(isLoaded){
-      console.log("Cheetah is loaded.")
+    if (isLoaded) {
+      //console.log("Cheetah is loaded.");
     }
 
     if (result !== null && isRecording) {
@@ -68,14 +58,14 @@ export default function Chatbot({ personality }) {
     }
 
     // Check for errors
-    if(error){
-      console.log("Error: ", error)
+    if (error) {
+      console.log("Error: ", error);
     }
 
-    if(isListening){
-      console.log("Cheetah is listening.")
+    if (isListening) {
+      console.log("Cheetah is listening.");
     }
-  }, [result, isRecording]);
+  }, [result, isRecording, isListening, isLoaded, error]);
 
   const handleMessage = async () => {
     if (input.trim() == "") return;
@@ -84,7 +74,7 @@ export default function Chatbot({ personality }) {
     const updatedMessages = [...messages, userMessage];
 
     setMessages(updatedMessages);
-    localStorage.setItem('messageHistory', JSON.stringify(updatedMessages));
+    localStorage.setItem("messageHistory", JSON.stringify(updatedMessages));
     setInput("");
 
     try {
@@ -93,46 +83,59 @@ export default function Chatbot({ personality }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message_history: updatedMessages, message: input }),
+        body: JSON.stringify({
+          message_history: updatedMessages,
+          message: input,
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
 
         // Add AI response to the message history
-        setMessages([...updatedMessages, { role: "assistant", content: data.response }]);
-        localStorage.setItem('messageHistory', JSON.stringify([...updatedMessages, { role: "assistant", content: data.response }]));
+        setMessages([
+          ...updatedMessages,
+          { role: "assistant", content: data.response },
+        ]);
+        localStorage.setItem(
+          "messageHistory",
+          JSON.stringify([
+            ...updatedMessages,
+            { role: "assistant", content: data.response },
+          ])
+        );
 
         if (selectedVoice) {
-          console.log("Calling OPENAI TTS API...")
+          console.log("Calling OPENAI TTS API...");
           // Call the server-side API route for text-to-speech
-          const ttsResponse = await fetch("https://api.openai.com/v1/audio/speech", {
-            method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-          },
-            body: JSON.stringify({
-              model: "tts-1-hd",
-              voice: selectedVoice,
-              input: data.response,
-            }),
-          });
-  
+          const ttsResponse = await fetch(
+            "https://api.openai.com/v1/audio/speech",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+              },
+              body: JSON.stringify({
+                model: "tts-1-hd",
+                voice: selectedVoice.toLowerCase(),
+                input: data.response,
+              }),
+            }
+          );
+
           if (ttsResponse.ok) {
             // Get the blob response and convert it to mp3
             const audioBlob = await ttsResponse.blob();
-            console.log("Blob: ", audioBlob)
+            console.log("Blob: ", audioBlob);
             const newAudioUrl = URL.createObjectURL(audioBlob);
-            console.log("Audio available at: ", newAudioUrl)
+            console.log("Audio available at: ", newAudioUrl);
             setAudioUrl(newAudioUrl);
-
           } else {
             console.error("Failed to generate speech");
           }
         }
 
-        
         setInput("");
       } else {
         console.error("Failed to get response");
@@ -146,40 +149,39 @@ export default function Chatbot({ personality }) {
     // Retrieve and preserve the initial system message
     const systemMessage = [messages[0], messages[1]];
 
-
     // Clear all messages except the initial system messages
     setMessages(systemMessage);
-    localStorage.setItem('messageHistory', JSON.stringify(systemMessage));
+    localStorage.setItem("messageHistory", JSON.stringify(systemMessage));
   };
 
   const startRecording = async () => {
-    
     try {
-      // 
+      //
       if (!isLoaded) {
         console.error("Cheetah is not loaded.");
         return;
       }
-
       // Check if the browser supports media devices
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         // Request access to the microphone
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
         // If we got here, the user has granted access
         console.log("Microphone access granted.");
-        
+
         // Start the recording
         await start();
+        console.log("Recording Started");
         setIsRecording(true);
         setCurrentTranscript("");
-        console.log("Recording started.");
       } else {
         // Handle the case where media devices are not supported
         console.error("Media devices are not supported on this browser.");
       }
     } catch (error) {
-      if (error.name === 'NotAllowedError') {
+      if (error.name === "NotAllowedError") {
         // Handle the case where user denies access
         console.error("Microphone access denied.");
       } else {
@@ -188,6 +190,7 @@ export default function Chatbot({ personality }) {
       }
     }
   };
+
   const stopRecording = async () => {
     try {
       await stop();
@@ -205,63 +208,40 @@ export default function Chatbot({ personality }) {
     }
   };
 
-  console.log("Is Recording:", isRecording);
-
   return (
-    <div className={styles.chatbox}>
-      <div className={styles.voiceSelector}>
-        <label htmlFor="voiceSelect">Select Voice:</label>
-        <select
-          id="voiceSelect"
-          onChange={(e) => setSelectedVoice(e.target.value)}
-          value={selectedVoice || ""}
-        >
-          <option value="">Mute</option>
-          <option value="alloy">Alloy</option>
-          <option value="echo">Echo</option>
-          <option value="fable">Fable</option>
-          <option value="onyx">Onyx</option>
-          <option value="nova">Nova</option>
-          <option value="shimmer">Shimmer</option>
-          
-        </select>
-      </div>
+    <main className={styles.container}>
+      <div className={styles.chatbox}>
+        <Dropdown setSelectedVoice={setSelectedVoice} />
 
-      <div>
-        {audioUrl && (
-          <audio controls>
-            <source id="audioSource" type="audio/mpeg" src={audioUrl}/>
-          </audio>
-        )}
-      </div>
+        {audioUrl && <audio id="audioSource" src={audioUrl} autoPlay />}
 
-      <div className={styles.messages}>
+        <div className={styles.messages}>
+          {messages.slice(2).map((msg, index) => (
+            <div
+              key={index}
+              className={`${styles.message} ${
+                msg.role == "assistant" ? styles.bot : styles.user
+              }`}
+            >
+              {msg.content}
+            </div>
+          ))}
+        </div>
 
-        {messages.slice(2).map((msg, index) => (
-          <div
-            key={index}
-            className={`${styles.message} ${
-              msg.role == "assistant" ? styles.bot : styles.user
-            }`}
-          >
-            {msg.content}
-          </div>
-        ))}
+        <div className={styles.inputContainer}>
+          <textarea
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !e.shiftKey && handleMessage()
+            }
+            className={styles.input}
+            placeholder="Write till your heart's content"
+            disabled={isRecording}
+          />
 
-      </div>
-
-      <div className={styles.inputContainer}>
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleMessage()}
-          className={styles.input}
-          placeholder="Type your message..."
-          disabled={isRecording}
-        />
-
-        {input?.trim() === "" ? (
+          {input?.trim() === "" ? (
             <>
               {isRecording ? (
                 <div className={styles.clearButton}>
@@ -279,10 +259,11 @@ export default function Chatbot({ personality }) {
             </button>
           )}
 
-        <button onClick={handleClearChat} className={styles.clearButton}>
-            Clear Chat
-        </button>
+          <button onClick={handleClearChat} className={styles.clearButton}>
+            Clear
+          </button>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
