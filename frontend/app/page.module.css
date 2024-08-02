@@ -13,7 +13,7 @@
   margin-bottom: 2rem;
 }
 
-.chatbox{
+/* .chatbox{
   width: 800px;
   height: 650px;
   display: flex;
@@ -23,7 +23,7 @@
   background-color: white;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   gap: 2rem;
-}
+} */
 
 .messages {
   flex: 1;
@@ -149,6 +149,65 @@
   cursor: pointer;
   border: none; 
 }
+
+.chatbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.voiceSelector {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.voiceSelector label {
+  font-weight: bold;
+}
+
+.voiceSelector select {
+  padding: 5px 10px;
+  font-size: 16px;
+}
+
+.audioControls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.audioControls button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.audioControls button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.audioControls button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.audioControls audio {
+  display: none;
+}
+
 
 @media (max-width: 600px){
   .cards{
