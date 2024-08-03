@@ -155,49 +155,51 @@ export default function Chatbot({ personality }) {
       setIsRecording(false);
       console.log("Recording stopped.");
 
-      if (audioBlob) {
-        console.log("Audio Blob: ", audioBlob);
-        const formData = new FormData();
-        formData.append("file", audioBlob, "speech.mp3");
-        formData.append("model", "whisper-1");
-        formData.append("response_format", "text");
+      // Wait for the 'dataavailable' event to be handled
+      mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0) {
+          const formData = new FormData();
+          formData.append("file", event.data, "speech.mp3");
+          formData.append("model", "whisper-1");
+          formData.append("response_format", "text");
 
-        try {
-          console.log("Calling OPENAI Audio Transcription API...");
-          const response = await fetch(
-            "https://api.openai.com/v1/audio/transcriptions",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-              },
-              body: formData,
-            }
-          );
+          try {
+            console.log("Calling OPENAI Audio Transcription API...");
+            const response = await fetch(
+              "https://api.openai.com/v1/audio/transcriptions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+                },
+                body: formData,
+              }
+            );
 
-          if (response.ok) {
-            try {
-              const text = await response.text();
-              console.log("Transcription Response: ", response);
-              setCurrentTranscript(text);
-              setInput(text);
-              await handleMessage();
-            } catch (jsonError) {
-              console.error("Error parsing JSON response:", jsonError);
-              const textResponse = await response.text();
-              console.error("Response text:", textResponse);
+            if (response.ok) {
+              try {
+                const text = await response.text();
+                console.log("Transcription Response: ", response);
+                setCurrentTranscript(text);
+                setInput(text);
+                await handleMessage();
+              } catch (jsonError) {
+                console.error("Error parsing JSON response:", jsonError);
+                const textResponse = await response.text();
+                console.error("Response text:", textResponse);
+              }
+            } else {
+              const errorText = await response.text();
+              console.error("Failed to transcribe audio. Error:", errorText);
             }
-          } else {
-            const errorText = await response.text();
-            console.error("Failed to transcribe audio. Error:", errorText);
+          } catch (error) {
+            console.error("Error transcribing audio:", error);
           }
-        } catch (error) {
-          console.error("Error transcribing audio:", error);
         }
-      }
+      };
     }
   };
-
+  
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behaviour: "smooth" });
   };
