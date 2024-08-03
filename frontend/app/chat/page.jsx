@@ -32,7 +32,7 @@ export default function Chatbot({ personality }) {
     scrollToBottom();
   }, [messages]);
 
-  const handleMessage = async () => {
+  const handleMessage = async (input) => {
     if (input.trim() == "") return;
 
     const userMessage = { role: "user", content: input };
@@ -53,6 +53,7 @@ export default function Chatbot({ personality }) {
           message: input,
         }),
       });
+      console.log("Falcon Response: ", response);
 
       if (response.ok) {
         const data = await response.json();
@@ -109,6 +110,7 @@ export default function Chatbot({ personality }) {
       console.error("Error Sending Message", error);
     }
   };
+
 
   const handleClearChat = () => {
     // Retrieve and preserve the initial system message
@@ -182,7 +184,9 @@ export default function Chatbot({ personality }) {
                 console.log("Transcription Response: ", response);
                 setCurrentTranscript(text);
                 setInput(text);
-                await handleMessage();
+                handleMessage(text);
+
+                console.log("Called handleMessage with transcript: ", input);
               } catch (jsonError) {
                 console.error("Error parsing JSON response:", jsonError);
                 const textResponse = await response.text();
@@ -199,10 +203,11 @@ export default function Chatbot({ personality }) {
       };
     }
   };
-  
+
   const scrollToBottom = () => {
     messageEndRef.current?.scrollIntoView({ behaviour: "smooth" });
   };
+
   return (
     <main className={styles.container}>
       <div className={styles.chatbox}>
@@ -230,7 +235,7 @@ export default function Chatbot({ personality }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) =>
-              e.key === "Enter" && !e.shiftKey && handleMessage()
+              e.key === "Enter" && !e.shiftKey && handleMessage(input)
             }
             className={styles.input}
             placeholder="Write till your heart's content"
@@ -250,7 +255,7 @@ export default function Chatbot({ personality }) {
               )}
             </>
           ) : (
-            <button onClick={handleMessage} className={styles.sendButton}>
+            <button onClick={handleMessage(input)} className={styles.sendButton}>
               Send
             </button>
           )}
