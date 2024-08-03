@@ -30,13 +30,20 @@
   padding: 1rem;
   overflow-y: auto;
 }
-
+.messages::-webkit-scrollbar{
+  width: 10px;
+}
+.messages::-webkit-scrollbar-track{
+  background-color: #f0f0f0;
+  border-radius: 10px;
+}
 .message {
   margin-bottom: 1rem;
   padding: 1rem;
   word-wrap: break-word;
   max-width: 80%;
 }
+
 
 .user{
   background-color: #f0f0f0;
@@ -66,7 +73,7 @@
 .input{
   background-color: #f0f0f0;
   flex: 1;
-  padding: 0.4rem;
+  padding: 0.6rem;
   font-size: 1rem;
   border: none;
   outline: none;
@@ -121,33 +128,39 @@
   background-color: #3fca9e; 
 }
 
-.cards{
+.cards {
   max-width: 800px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 1rem;
   margin: 0 auto;
+  justify-content: center;
 }
-
-.card{
+.card:last-child {
+  grid-column-end: span 2;
+}
+.card {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   text-transform: capitalize;
-  width: 250px;
-  height: 180px;
   padding: 1rem;
   border-radius: 10px;
   background-color: rgba(246, 242, 242, 0.755);
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   gap: 1rem;
   cursor: pointer;
 }
-
-.card:hover{
+.card:hover {
   background-color: white;
 }
-.clicked{
+
+.clicked {
   background-color: white;
+}
+
+.card_info {
+  flex: 1;
 }
 
 .btnOutline {

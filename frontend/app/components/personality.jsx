@@ -97,23 +97,22 @@ export default function Personalities({ setPersonality }) {
     <div className={styles.cardsOutline}>
       <div className={styles.cards}>
         {personalities.map((person, index) => (
-          <div>
+          <div
+            key={index}
+            onClick={(e) => handleDiv(e, index)}
+            className={`${styles.card} ${
+              currentIndex === index ? styles.clicked : ""
+            }`}
+          >
             <div>
               <Image
                 width="100"
-                height="50"
-                src="../../public/next.svg"
-                
+                height="100"
+                src={`/${person.name}.jpg`}
+                alt={`${person.name} logo`}
               />
             </div>
-            <div
-              key={index}
-              onClick={(e) => handleDiv(e, index)}
-              name={person.name}
-              className={`${styles.card} ${
-                currentIndex == index ? styles.clicked : ``
-              }`}
-            >
+            <div className={styles.card_info}>
               <h2>{person.name}</h2>
               <p>{person.desc}</p>
             </div>
