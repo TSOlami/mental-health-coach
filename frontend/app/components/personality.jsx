@@ -5,15 +5,15 @@ import Image from "next/image";
 const personalities = [
   {
     name: "empathetic",
-    desc: "empathetic person and a great listener with expert knowledge in emotional intelligence, CBT, psychology, therapy, and counselling",
+    desc: " a great listener with expert knowledge in emotional intelligence, CBT, psychology, therapy, and counselling",
   },
   {
     name: "motivator",
     desc: "great motivator and encourager who excels at using positive reinforcement and motivational techniques",
   },
   {
-    name: "spiritual",
-    desc: "calm and patient advisor who provides guidance and support in a non-judgmental way",
+    name: "wise sage",
+    desc: "the wise one offers thoughtful guidance and support in a non-judgmental manner.",
   },
   {
     name: "comedian",
@@ -21,7 +21,7 @@ const personalities = [
   },
   {
     name: "bestie",
-    desc: "strong leader who takes charge of situations and provides direction and guidance",
+    desc: "Your supportive friend who is always ready to listen, share gists and make you feel comfortable.",
   },
 ];
 
@@ -46,7 +46,7 @@ const defaultPrompt =
 export default function Personalities({ setPersonality }) {
   const [selectedPersonality, setSelectedPersonality] = useState("empathetic");
 
-  const [currentIndex, setCurrentIndex] = useState();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleDiv = (e, index) => {
     setSelectedPersonality(e.currentTarget.getAttribute("name"));
@@ -99,6 +99,7 @@ export default function Personalities({ setPersonality }) {
         {personalities.map((person, index) => (
           <div
             key={index}
+            name={person.name}
             onClick={(e) => handleDiv(e, index)}
             className={`${styles.card} ${
               currentIndex === index ? styles.clicked : ""
