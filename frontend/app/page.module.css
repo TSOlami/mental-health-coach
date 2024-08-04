@@ -1,29 +1,18 @@
-.container{
+.container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f0f0f0;
-  color: black;
+  background-color: #f0f4f8;
+  color: #333;
+  padding: 2rem;
 }
 
 .logo{
   font-size: 1.5rem;
   margin-bottom: 2rem;
 }
-
-/* .chatbox{
-  width: 800px;
-  height: 650px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  gap: 2rem;
-} */
 
 .messages {
   flex: 1;
@@ -136,9 +125,9 @@
   margin: 0 auto;
   justify-content: center;
 }
-.card:last-child {
+/* .card:last-child {
   grid-column-end: span 2;
-}
+} */
 .card {
   display: flex;
   flex-direction: row;
@@ -174,7 +163,7 @@
   padding: 1rem;
   font-size: 1.2rem;
   border-radius: 10px;
-  background-color: #007bff;
+  background-color: #42d6a6;
   color: white; 
   cursor: pointer;
   border: none; 
