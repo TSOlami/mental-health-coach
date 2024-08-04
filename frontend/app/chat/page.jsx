@@ -255,7 +255,7 @@ export default function Chatbot({ personality }) {
               )}
             </>
           ) : (
-            <button onClick={handleMessage(input)} className={styles.sendButton}>
+            <button onClick={() => handleMessage(input)} className={styles.sendButton}>
               Send
             </button>
           )}
