@@ -4,6 +4,7 @@
   position: relative;
   width: 350px;
   font-family: Arial, sans-serif;
+  padding-bottom: 0.5rem;
 }
 
 .selected {
