@@ -1,12 +1,7 @@
 # Mental health support AI
 
-## Prerequisties
-1. Create a virtual environment.
-2. Install requirements.
+## Steps
+1. Create a virtual environment (optional).
+2. Navigate to the "backend" directory and install requirements using "pip install -r requirements.txt"
 3. Create a .env file and set AI71_API_KEY = "<your AI71 API key>"
-4. Run the main file.
-
-## Example usage 
-1. Run the file on the terminal using: python3 main.py
-2. Choose an AI personality
-3. Start having conversations with the AI  
+4. Run the server using "python manage.py runserver"
