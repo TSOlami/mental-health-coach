@@ -1,0 +1,9 @@
+{
+    "rewrites": [
+      {
+        "source": "/api/:path*",
+        "destination": "https://mental-health-coach.onrender.com/api/:path*"
+      }
+    ]
+  }
+  
