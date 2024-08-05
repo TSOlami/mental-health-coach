@@ -43,7 +43,8 @@ export default function Chatbot({ personality }) {
     setInput("");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/chat/message/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/message/`, 
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
