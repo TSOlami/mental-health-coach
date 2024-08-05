@@ -43,7 +43,7 @@ export default function Chatbot({ personality }) {
     setInput("");
 
     try {
-      const response = await fetch("https://budgieai.vercel.app/api/chat/message/", 
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/message/`, 
       {
         method: "POST",
         headers: {
