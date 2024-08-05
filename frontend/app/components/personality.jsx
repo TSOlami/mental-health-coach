@@ -86,7 +86,7 @@ export default function Personalities({ setPersonality }) {
         // Navigate to the chat page
         window.location.href = "/chat";
       } else {
-        console.error("Failed to initialize chat");
+        console.error("Failed to initialize chat", response);
       }
     } catch (error) {
       console.error("Error:", error);
