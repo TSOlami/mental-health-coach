@@ -63,7 +63,7 @@ export default function Personalities({ setPersonality }) {
       console.log("Selected personality prompt:", systemPrompt);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/api/chat/initialize/",
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/initialize/`,
         {
           method: "POST",
           headers: {
