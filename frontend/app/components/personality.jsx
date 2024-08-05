@@ -105,12 +105,13 @@ export default function Personalities({ setPersonality }) {
               currentIndex === index ? styles.clicked : ""
             }`}
           >
-            <div>
+            <div className={styles.card_img}>
               <Image
                 width="100"
                 height="100"
                 src={`/${person.name}.jpg`}
                 alt={`${person.name} logo`}
+                loading="lazy"
               />
             </div>
             <div className={styles.card_info}>
