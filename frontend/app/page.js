@@ -5,7 +5,7 @@ import axios from "axios";
 import styles from "./page.module.css";
 import { FaMicrophone } from "react-icons/fa";
 import Chatbot from "./components/Chatbot";
-import Personalities from "./components/Personality";
+import { Personalities } from "./components";
 
 export default function Home() {
   const [personality, setPersonality] = useState("");
