@@ -105,7 +105,7 @@ export default function Personalities({ setPersonality }) {
               currentIndex === index ? styles.clicked : ""
             }`}
           >
-            <div className={styles.card_img}>
+            <div>
               <Image
                 width="100"
                 height="100"
