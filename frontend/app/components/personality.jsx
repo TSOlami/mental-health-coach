@@ -63,7 +63,7 @@ export default function Personalities({ setPersonality }) {
       console.log("Selected personality prompt:", systemPrompt);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/initialize/`,
+        "https://budgieai.vercel.app/api/chat/initialize/",
         {
           method: "POST",
           headers: {
