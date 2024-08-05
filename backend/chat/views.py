@@ -1,5 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework import status
 from ai71 import AI71
 import os
@@ -18,6 +19,9 @@ if not AI71_API_KEY:
 
 # Create a client
 client = AI71(AI71_API_KEY)
+
+def home(request):
+    return HttpResponse("Welcome to the Mental Health Coach!")
 
 
 @api_view(["POST"])
