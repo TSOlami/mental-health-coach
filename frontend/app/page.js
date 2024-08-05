@@ -12,8 +12,13 @@ export default function Home() {
   return (
     <main className={styles.container}>
       <nav className={styles.logo}>
-        <h1>Budgie</h1>
+        <h1 className={styles.title}>
+          Budgie
+        </h1>
       </nav>
+      <p className={styles.description}>
+        Your friendly mental health coach, here to support and guide you through your emotional journey. 
+      </p>
       <Personalities setPersonality={setPersonality} />
     </main>
   );
