@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["mental-health-coach.onrender.com", "localhost"]
+ALLOWED_HOSTS = ["mental-health-coach.onrender.com", "localhost", "budgieai.vercel.app",]
 
 
 # Application definition
