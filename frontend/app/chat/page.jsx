@@ -210,7 +210,7 @@ export default function Chatbot({ personality }) {
         </div>
         {audioUrl && <audio id="audioSource" src={audioUrl} autoPlay />}
 
-        <div className={styles.messagesContainer}>
+        <div className={styles.messages}>
           {messages.slice(2).map((msg, index) => (
             <div
               key={index}
