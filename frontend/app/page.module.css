@@ -27,6 +27,16 @@
   color: #666;
 }
 
+.messagesContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 70vh;
+  padding-top: 2rem;
+  padding-inline: 1rem;
+  margin-bottom: 2rem;
+}
+
 .messages {
   flex: 1;
   padding: 1rem;
@@ -214,12 +224,20 @@
   align-items: center;
   width: 100%;
   max-width: 800px;
-  height: 700px;
+  height: 90vh;
   margin: 0 auto;
   padding: 20px;
   background: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chatboxHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  padding: 10px;
 }
 
 .voiceSelector {

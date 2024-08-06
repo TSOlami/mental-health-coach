@@ -2,9 +2,8 @@
 
 .dropdownContainer {
   position: relative;
-  width: 350px;
+  width: 15rem;
   font-family: Arial, sans-serif;
-  padding-bottom: 0.5rem;
 }
 
 .selected {
