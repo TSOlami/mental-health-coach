@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./dropdown.module.css";
 
 export default function Dropdown({ setSelectedVoice }) {
-  const [selected, setSelected] = useState("Select an option");
+  const [selected, setSelected] = useState("Select Voice");
   const [isOpen, setIsOpen] = useState(false);
   const options = ["Mute", "Alloy", "Echo", "Fable", "Onyx", "Nova", "Shimmer"];
 
@@ -11,7 +11,7 @@ export default function Dropdown({ setSelectedVoice }) {
     setIsOpen(false);
   };
   useEffect(() => {
-    if (selected != "Select an option") setSelectedVoice(selected);
+    if (selected != "Select Voice") setSelectedVoice(selected);
   }, [selected]);
 
   return (
