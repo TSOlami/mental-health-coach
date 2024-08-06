@@ -12,7 +12,6 @@
     "@langchain/core": "^0.2.18",
     "@langchain/google-genai": "^0.0.23",
     "@picovoice/cheetah-react": "^2.0.0",
-    "@picovoice/leopard-web": "^2.0.1",
     "@picovoice/web-voice-processor": "^4.0.9",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
@@ -21,7 +20,8 @@
     "openai": "^4.53.2",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^5.2.1"
+    "react-icons": "^5.2.1",
+    "sharp": "^0.33.4"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.25.2",
