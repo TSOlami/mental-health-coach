@@ -167,7 +167,6 @@ export default function Chatbot({ personality }) {
           formData.append("response_format", "text");
 
           try {
-            console.log("Calling OPENAI Audio Transcription API...");
             const response = await fetch(
               "https://api.openai.com/v1/audio/transcriptions",
               {
@@ -180,19 +179,10 @@ export default function Chatbot({ personality }) {
             );
 
             if (response.ok) {
-              try {
-                const text = await response.text();
-                console.log("Transcription Response: ", response);
+              const text = await response.text();
                 setCurrentTranscript(text);
                 setInput(text);
                 handleMessage(text);
-
-                console.log("Called handleMessage with transcript: ", input);
-              } catch (jsonError) {
-                console.error("Error parsing JSON response:", jsonError);
-                const textResponse = await response.text();
-                console.error("Response text:", textResponse);
-              }
             } else {
               const errorText = await response.text();
               console.error("Failed to transcribe audio. Error:", errorText);
@@ -212,11 +202,15 @@ export default function Chatbot({ personality }) {
   return (
     <main className={styles.container}>
       <div className={styles.chatbox}>
-        <Dropdown setSelectedVoice={setSelectedVoice} />
-
+        <div className={styles.chatboxHeader}>
+          <Dropdown setSelectedVoice={setSelectedVoice} />
+          <button onClick={handleClearChat} className={styles.clearButton}>
+            Clear
+          </button>
+        </div>
         {audioUrl && <audio id="audioSource" src={audioUrl} autoPlay />}
 
-        <div className={styles.messages}>
+        <div className={styles.messagesContainer}>
           {messages.slice(2).map((msg, index) => (
             <div
               key={index}
@@ -261,9 +255,7 @@ export default function Chatbot({ personality }) {
             </button>
           )}
 
-          <button onClick={handleClearChat} className={styles.clearButton}>
-            Clear
-          </button>
+          
         </div>
       </div>
     </main>
