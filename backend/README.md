@@ -10,4 +10,3 @@
 1. Run the file on the terminal using: python3 main.py
 2. Choose an AI personality
 3. Start having conversations with the AI  
-
