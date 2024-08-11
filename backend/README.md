@@ -11,4 +11,3 @@
 2. Choose an AI personality
 3. Start having conversations with the AI  
 
-## Example usage for the web app
